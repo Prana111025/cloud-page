@@ -1,5 +1,6 @@
 package cloudpage.controller;
 
+import cloudpage.dto.FileResource;
 import cloudpage.exceptions.FileNotFoundException;
 import cloudpage.service.FileService;
 import cloudpage.service.FolderService;
@@ -29,7 +30,7 @@ public class FileController {
   public void uploadFile(@RequestParam String folderPath, @RequestParam MultipartFile file)
       throws IOException {
     var user = userService.getCurrentUser();
-    fileService.uploadFile(user.getRootFolderPath(), folderPath, file);
+    fileService.uploadFile(user.getRootFolderPath(), folderPath, file, user.getStorageQuotaMb());
   }
 
   @GetMapping("/content")
@@ -64,12 +65,16 @@ public class FileController {
     var user = userService.getCurrentUser();
     Path fullPath = Paths.get(user.getRootFolderPath(), path).normalize();
     folderService.validatePath(user.getRootFolderPath(), fullPath); // ensure security
-    Resource resource = new UrlResource(fullPath.toUri());
+
+    FileResource result = fileService.loadAsResource(fullPath);
+
     return ResponseEntity.ok()
+        .eTag(result.getETag())
+        .lastModified(result.getLastModified())
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + fullPath.getFileName() + "\"")
-        .body(resource);
+        .body(result.getResource());
   }
 
   @GetMapping("/view")

@@ -1,6 +1,5 @@
 package cloudpage.dto;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,10 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class FolderDto {
+public class FolderContentItemDto {
+
   private String name;
   private String path;
-  private List<FolderListItemDto> folders;
-  private List<FileDto> files;
+  private boolean directory;
+  private long size;
+  private String mimeType;
   private long lastModifiedAt;
 }
